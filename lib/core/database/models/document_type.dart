@@ -1,3 +1,4 @@
+// lib/core/database/models/document_type.dart
 import 'package:drift/drift.dart';
 
 // --- ENUMS ---

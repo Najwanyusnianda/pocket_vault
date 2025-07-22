@@ -1,3 +1,4 @@
+// lib/features/documents/presentation/providers/document_providers.dart
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
@@ -30,4 +31,25 @@ DocumentRepository documentRepository(Ref ref) {
 Stream<List<Document>> documentListStream(Ref ref) {
   final repository = ref.watch(documentRepositoryProvider);
   return repository.watchAllDocuments();
+}
+// 5. Provider for adding a document
+@riverpod
+class DocumentForm extends _$DocumentForm {
+  @override
+  FutureOr<void> build() {
+    // No initial state needed
+  }
+
+  Future<void> addDocument(DocumentsCompanion document) async {
+    // Set state to loading
+    state = const AsyncValue.loading();
+    
+    // Get the repository
+    final repository = ref.read(documentRepositoryProvider);
+
+    // Use AsyncValue.guard to handle success/error states automatically
+    state = await AsyncValue.guard(() {
+      return repository.addDocument(document);
+    });
+  }
 }

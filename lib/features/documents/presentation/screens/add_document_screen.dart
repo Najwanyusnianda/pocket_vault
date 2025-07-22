@@ -1,12 +1,10 @@
-import 'package:drift/drift.dart' as drift;
+// lib/features/documents/presentation/screens/add_document_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../../core/database/app_database.dart';
+import 'package:pocket_vault/core/database/app_database.dart';
 import '../providers/document_providers.dart';
-// Import your Main/Sub type models
-import '../../../../core/database/models/document_type.dart';
+import 'package:drift/drift.dart' as drift;
 
 class AddDocumentScreen extends ConsumerStatefulWidget {
   const AddDocumentScreen({super.key});
@@ -18,11 +16,6 @@ class AddDocumentScreen extends ConsumerStatefulWidget {
 class _AddDocumentScreenState extends ConsumerState<AddDocumentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  // ... controllers for other fields (description, notes etc.)
-
-  // For your main/sub type dropdowns
-  MainType? _selectedMainType;
-  SubType? _selectedSubType;
 
   @override
   void dispose() {
@@ -30,55 +23,75 @@ class _AddDocumentScreenState extends ConsumerState<AddDocumentScreen> {
     super.dispose();
   }
 
-  Future<void> _saveDocument() async {
+  void _saveDocument() {
     if (_formKey.currentState!.validate()) {
-      // Create a Drift "Companion" object to insert.
-      // Use drift.Value() to explicitly set values.
-      final newDocument = DocumentsCompanion(
-        title: drift.Value(_titleController.text),
-        mainType: drift.Value(_selectedMainType!),
-        subType: drift.Value(_selectedSubType!),
-        // IMPORTANT: For now, we use a placeholder for file paths.
-        filePath: const drift.Value('placeholder/path'),
-        creationDate: drift.Value(DateTime.now()),
-        updatedDate: drift.Value(DateTime.now()),
+      final title = _titleController.text;
+
+      final newDoc = DocumentsCompanion.insert(
+        title: title,
+        filePath: 'dummy/path', // Placeholder
+        creationDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+        isArchived: drift.Value(false),
+        isFavorite: drift.Value(false),
       );
 
-      // Get the repository from the provider and call the add method.
-      // Use ref.read() for one-time actions inside functions.
-      try {
-        await ref.read(documentRepositoryProvider).addDocument(newDocument);
-        // If successful, go back to the previous screen.
-        if (mounted) context.pop(); 
-      } catch (e) {
-        // Handle error, show a snackbar, etc.
-      }
+      ref.read(documentFormProvider.notifier).addDocument(newDoc).then((_) {
+        if (mounted) {
+          context.pop();
+        }
+      });
     }
   }
 
+  // --- FIX IS HERE ---
+  // The build method was missing. It must be inside the State class.
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<void>>(documentFormProvider, (_, state) {
+      if (state is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${state.error}')),
+        );
+      }
+    });
+
+    final formState = ref.watch(documentFormProvider);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Add New Document')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Document Title'),
-              validator: (value) => value!.isEmpty ? 'Please enter a title' : null,
-            ),
-            // TODO: Add Dropdowns for MainType and SubType here,
-            // using the form providers we discussed to manage state.
-            // TODO: Add other fields like expiration date picker.
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveDocument,
-              child: const Text('Save Document'),
-            )
-          ],
+      appBar: AppBar(
+        title: const Text('Add New Document'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Document Title',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a title';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: formState.isLoading ? null : _saveDocument,
+                child: formState.isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : const Text('Save Document'),
+              )
+            ],
+          ),
         ),
       ),
     );

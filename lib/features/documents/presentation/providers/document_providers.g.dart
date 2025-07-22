@@ -78,5 +78,21 @@ final documentListStreamProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DocumentListStreamRef = AutoDisposeStreamProviderRef<List<Document>>;
+String _$documentFormHash() => r'b1eb623243c9f9fe6a0cb7eaf5e94dc62071c1e9';
+
+/// See also [DocumentForm].
+@ProviderFor(DocumentForm)
+final documentFormProvider =
+    AutoDisposeAsyncNotifierProvider<DocumentForm, void>.internal(
+      DocumentForm.new,
+      name: r'documentFormProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$documentFormHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$DocumentForm = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

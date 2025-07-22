@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pocket_vault/features/documents/presentation/screens/document_list_screen.dart';
+import 'package:pocket_vault/features/documents/presentation/screens/add_document_screen.dart';
 
 // Create a provider for your router
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -12,6 +13,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/',
         builder: (context, state) => const DocumentListScreen(),
       ),
+      GoRoute(
+        path: '/add-document', // This path already exists
+        builder: (context, state) => const AddDocumentScreen(), // Add the screen here
+      ),
+
       // Add other routes here as you build them
     ],
   );
