@@ -97,6 +97,147 @@ final documentListStreamProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DocumentListStreamRef = AutoDisposeStreamProviderRef<List<Document>>;
+String _$singleDocumentHash() => r'eac8adadb24864086303a25bf15232c4782cb469';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+/// See also [singleDocument].
+@ProviderFor(singleDocument)
+const singleDocumentProvider = SingleDocumentFamily();
+
+/// See also [singleDocument].
+class SingleDocumentFamily extends Family<AsyncValue<Document>> {
+  /// See also [singleDocument].
+  const SingleDocumentFamily();
+
+  /// See also [singleDocument].
+  SingleDocumentProvider call(int documentId) {
+    return SingleDocumentProvider(documentId);
+  }
+
+  @override
+  SingleDocumentProvider getProviderOverride(
+    covariant SingleDocumentProvider provider,
+  ) {
+    return call(provider.documentId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'singleDocumentProvider';
+}
+
+/// See also [singleDocument].
+class SingleDocumentProvider extends AutoDisposeStreamProvider<Document> {
+  /// See also [singleDocument].
+  SingleDocumentProvider(int documentId)
+    : this._internal(
+        (ref) => singleDocument(ref as SingleDocumentRef, documentId),
+        from: singleDocumentProvider,
+        name: r'singleDocumentProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$singleDocumentHash,
+        dependencies: SingleDocumentFamily._dependencies,
+        allTransitiveDependencies:
+            SingleDocumentFamily._allTransitiveDependencies,
+        documentId: documentId,
+      );
+
+  SingleDocumentProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.documentId,
+  }) : super.internal();
+
+  final int documentId;
+
+  @override
+  Override overrideWith(
+    Stream<Document> Function(SingleDocumentRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: SingleDocumentProvider._internal(
+        (ref) => create(ref as SingleDocumentRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        documentId: documentId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<Document> createElement() {
+    return _SingleDocumentProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SingleDocumentProvider && other.documentId == documentId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, documentId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SingleDocumentRef on AutoDisposeStreamProviderRef<Document> {
+  /// The parameter `documentId` of this provider.
+  int get documentId;
+}
+
+class _SingleDocumentProviderElement
+    extends AutoDisposeStreamProviderElement<Document>
+    with SingleDocumentRef {
+  _SingleDocumentProviderElement(super.provider);
+
+  @override
+  int get documentId => (origin as SingleDocumentProvider).documentId;
+}
+
 String _$documentFormHash() => r'b1eb623243c9f9fe6a0cb7eaf5e94dc62071c1e9';
 
 /// See also [DocumentForm].
@@ -113,5 +254,21 @@ final documentFormProvider =
     );
 
 typedef _$DocumentForm = AutoDisposeAsyncNotifier<void>;
+String _$documentUpdateHash() => r'cc9c789ac8d98c3008e38355f78bdeb9fa0061b0';
+
+/// See also [DocumentUpdate].
+@ProviderFor(DocumentUpdate)
+final documentUpdateProvider =
+    AutoDisposeAsyncNotifierProvider<DocumentUpdate, void>.internal(
+      DocumentUpdate.new,
+      name: r'documentUpdateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$documentUpdateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$DocumentUpdate = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

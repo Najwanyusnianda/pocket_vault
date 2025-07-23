@@ -9,6 +9,8 @@ abstract class DocumentRepository {
   Future<void> addDocument(DocumentsCompanion document);
   Future<void> updateDocument(DocumentsCompanion document);
   Future<void> deleteDocument(int id);
+  Future<Document> getDocumentById(int id);
+  Stream<Document> watchDocumentById(int id);
   Future<void> createDocumentWithFile({
     required String title,
     String? description,

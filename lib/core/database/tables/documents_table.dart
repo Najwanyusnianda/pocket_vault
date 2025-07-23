@@ -2,7 +2,6 @@
 import 'package:drift/drift.dart';
 
 // We'll define bundles later, but we can reference it now.
-import 'bundles_table.dart';
 
 // This will be a simple Dart enum for document types
 // We will create this file next.

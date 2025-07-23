@@ -3,7 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/daos/documents_dao.dart';
-import '../../../../core/database/models/document_type.dart';
 import '../../data/repositories/document_repository.dart';
 import '../../data/repositories/document_repository_impl.dart';
 import '../../data/models/document_filter.dart';
@@ -92,7 +91,15 @@ Stream<List<Document>> documentListStream(Ref ref) {
   final repository = ref.watch(documentRepositoryProvider);
   return repository.watchAllDocuments();
 }
-// 5. Provider for adding a document
+
+// 8. Provider for single document by ID
+@riverpod
+Stream<Document> singleDocument(Ref ref, int documentId) {
+  final repository = ref.watch(documentRepositoryProvider);
+  return repository.watchDocumentById(documentId);
+}
+
+// 9. Provider for adding a document
 @riverpod
 class DocumentForm extends _$DocumentForm {
   @override
@@ -110,6 +117,28 @@ class DocumentForm extends _$DocumentForm {
     // Use AsyncValue.guard to handle success/error states automatically
     state = await AsyncValue.guard(() {
       return repository.addDocument(document);
+    });
+  }
+}
+
+// 10. Provider for updating a document
+@riverpod
+class DocumentUpdate extends _$DocumentUpdate {
+  @override
+  FutureOr<void> build() {
+    // No initial state needed
+  }
+
+  Future<void> updateDocument(DocumentsCompanion document) async {
+    // Set state to loading
+    state = const AsyncValue.loading();
+    
+    // Get the repository
+    final repository = ref.read(documentRepositoryProvider);
+
+    // Use AsyncValue.guard to handle success/error states automatically
+    state = await AsyncValue.guard(() {
+      return repository.updateDocument(document);
     });
   }
 }

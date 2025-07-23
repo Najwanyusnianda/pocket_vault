@@ -1,0 +1,42 @@
+
+
+Please refactor this Flutter screen into clean architecture following this structure:
+lib/features/documents/presentation/controllers/
+lib/features/documents/presentation/helpers/
+lib/features/documents/presentation/widgets/edit_document
+
+File: // lib/features/documents/presentation/screens/edit_document_screen.dart
+
+
+Requirements:
+- Extract business logic into controllers
+- Create reusable widgets in widgets folder
+- Add helper functions where needed
+- Maintain all existing functionality
+- Follow Flutter clean architecture best practices
+- Add proper state management
+- Include error handling
+
+Addition :
+
+Before Write code, please write your implementation planning
+
+please check this folder for understanding database, repository and provider :
+
+lib/core/database/app_database.dart
+
+lib/core/database/daos/documents_dao.dart
+
+lib/core/database/models/document_type.dart
+
+lib/core/database/tables/documents_table.dart
+
+lib/features/documents/data/repositories/document_repository.dart
+
+lib/features/documents/data/repositories/document_repository_impl.dart
+
+lib/features/documents/presentation/providers/document_providers.dart
+
+lib/features/documents/presentation/controllers/
+lib/features/documents/presentation/helpers/
+lib/features/documents/presentation/widgets/

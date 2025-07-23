@@ -33,6 +33,16 @@ class DocumentRepositoryImpl implements DocumentRepository {
     return _documentsDao.deleteDocument(id);
   }
 
+  @override
+  Future<Document> getDocumentById(int id) {
+    return _documentsDao.getDocumentById(id);
+  }
+
+  @override
+  Stream<Document> watchDocumentById(int id) {
+    return _documentsDao.watchDocumentById(id);
+  }
+
   
   @override
   Future<void> createDocumentWithFile({

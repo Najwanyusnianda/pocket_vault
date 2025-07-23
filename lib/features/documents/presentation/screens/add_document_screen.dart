@@ -12,7 +12,8 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/database/models/document_type.dart';
 import '../../../../core/services/file_picker_service.dart';
 import '../providers/document_providers.dart';
-import '../helpers/document_type_helpers.dart';
+import '../widgets/add_document/document_type_selector.dart';
+import '../widgets/add_document/file_preview_widget.dart';
 
 class AddDocumentScreen extends ConsumerStatefulWidget {
   final FilePickerResult? fileResult;
@@ -29,11 +30,8 @@ class AddDocumentScreen extends ConsumerStatefulWidget {
 class _AddDocumentScreenState extends ConsumerState<AddDocumentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
   
   MainType? _selectedMainType;
-  DateTime? _expirationDate;
-  bool _isFavorite = false;
 
   @override
   void initState() {
@@ -48,7 +46,6 @@ class _AddDocumentScreenState extends ConsumerState<AddDocumentScreen> {
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -82,7 +79,7 @@ class _AddDocumentScreenState extends ConsumerState<AddDocumentScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Document'),
+        title: const Text('Quick Save Document'),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close),
@@ -110,7 +107,7 @@ class _AddDocumentScreenState extends ConsumerState<AddDocumentScreen> {
             children: [
               // File preview (only if file is provided)
               if (widget.fileResult != null) ...[
-                _buildFilePreview(),
+                FilePreviewWidget(fileResult: widget.fileResult!),
                 const SizedBox(height: 24),
               ],
 
@@ -132,202 +129,21 @@ class _AddDocumentScreenState extends ConsumerState<AddDocumentScreen> {
               const SizedBox(height: 16),
 
               // Document type selector
-              _buildTypeSelector(),
-              const SizedBox(height: 16),
-
-              // Description
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  hintText: 'Add notes or description',
-                ),
-                maxLines: 3,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 16),
-
-              // Expiration date
-              _buildExpirationDatePicker(),
-              const SizedBox(height: 16),
-
-              // Favorite toggle
-              SwitchListTile(
-                title: const Text('Mark as Favorite'),
-                subtitle: const Text('Quick access from favorites'),
-                value: _isFavorite,
-                onChanged: (value) {
+              DocumentTypeSelector(
+                selectedType: _selectedMainType,
+                onTypeSelected: (type) {
                   setState(() {
-                    _isFavorite = value;
+                    _selectedMainType = type;
                   });
                 },
-                contentPadding: EdgeInsets.zero,
               ),
+              const SizedBox(height: 16),
+
             ],
           ),
         ),
       ),
     );
-  }
-
-  Widget _buildFilePreview() {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final filePickerService = FilePickerService();
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          // File icon
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              filePickerService.isPdfFile(widget.fileResult?.fileExtension)
-                  ? Icons.picture_as_pdf
-                  : Icons.image,
-              color: colorScheme.onPrimaryContainer,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // File info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.fileResult?.fileName ?? 'Unknown file',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _getFileTypeDisplay(),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTypeSelector() {
-    final theme = Theme.of(context);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Document Type',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: MainType.values.map((type) {
-            final isSelected = _selectedMainType == type;
-            return FilterChip(
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    type.getIcon(),
-                    size: 16,
-                    color: isSelected
-                        ? theme.colorScheme.onSecondaryContainer
-                        : type.getColor(context),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(type.getName()),
-                ],
-              ),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  _selectedMainType = selected ? type : null;
-                });
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildExpirationDatePicker() {
-    final theme = Theme.of(context);
-    
-    return InkWell(
-      onTap: _selectExpirationDate,
-      child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Expiration Date (Optional)',
-          suffixIcon: Icon(Icons.calendar_today),
-        ),
-        child: Text(
-          _expirationDate != null
-              ? '${_expirationDate!.day}/${_expirationDate!.month}/${_expirationDate!.year}'
-              : 'Tap to select date',
-          style: _expirationDate != null
-              ? null
-              : TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                ),
-        ),
-      ),
-    );
-  }
-
-  String _getFileTypeDisplay() {
-    final extension = widget.fileResult?.fileExtension;
-    if (extension == null) return 'Unknown format';
-    
-    final filePickerService = FilePickerService();
-    if (filePickerService.isPdfFile(extension)) {
-      return 'PDF Document';
-    } else if (filePickerService.isImageFile(extension)) {
-      return 'Image (${extension.toUpperCase()})';
-    }
-    return extension.toUpperCase();
-  }
-
-  Future<void> _selectExpirationDate() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _expirationDate ?? DateTime.now().add(const Duration(days: 365)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
-    );
-
-    if (date != null) {
-      setState(() {
-        _expirationDate = date;
-      });
-    }
   }
 
   Future<void> _saveDocument() async {
@@ -360,17 +176,13 @@ class _AddDocumentScreenState extends ConsumerState<AddDocumentScreen> {
       // Create document companion for database
       final document = DocumentsCompanion(
         title: drift.Value(_titleController.text.trim()),
-        description: drift.Value(
-          _descriptionController.text.trim().isEmpty 
-              ? null 
-              : _descriptionController.text.trim()
-        ),
+        description: const drift.Value(null), // No description in quicksave
         filePath: drift.Value(savedFilePath),
         mainType: drift.Value(_selectedMainType),
         creationDate: drift.Value(DateTime.now()),
         updatedDate: drift.Value(DateTime.now()),
-        expirationDate: drift.Value(_expirationDate),
-        isFavorite: drift.Value(_isFavorite),
+        expirationDate: const drift.Value(null), // No expiration in quicksave
+        isFavorite: const drift.Value(false), // Not favorite by default
         isArchived: const drift.Value(false),
       );
 

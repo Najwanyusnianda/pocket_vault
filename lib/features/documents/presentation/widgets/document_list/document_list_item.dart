@@ -2,9 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../../core/database/app_database.dart';
-import '../../../../../core/database/models/document_type.dart';
 import '../../helpers/document_type_helpers.dart'; // <-- Import the new extension file
 
 class DocumentListItem extends StatelessWidget {
