@@ -59,6 +59,25 @@ final documentRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DocumentRepositoryRef = AutoDisposeProviderRef<DocumentRepository>;
+String _$filteredDocumentListHash() =>
+    r'382a29442b7cfb2bdd02dc3482e210c3c622d2b9';
+
+/// See also [filteredDocumentList].
+@ProviderFor(filteredDocumentList)
+final filteredDocumentListProvider =
+    AutoDisposeStreamProvider<List<Document>>.internal(
+      filteredDocumentList,
+      name: r'filteredDocumentListProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$filteredDocumentListHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef FilteredDocumentListRef = AutoDisposeStreamProviderRef<List<Document>>;
 String _$documentListStreamHash() =>
     r'd951188b6b41f1c339dbc1fb2897a355d15ebfe8';
 

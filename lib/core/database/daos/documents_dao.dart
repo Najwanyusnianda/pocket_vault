@@ -1,3 +1,4 @@
+// lib/core/database/daos/documents_dao.dart
 import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables/documents_table.dart';

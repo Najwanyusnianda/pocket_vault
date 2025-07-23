@@ -1,3 +1,4 @@
+// lib/core/database/tables/documents_table.dart
 import 'package:drift/drift.dart';
 
 // We'll define bundles later, but we can reference it now.
