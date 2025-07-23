@@ -25,8 +25,8 @@ class DocumentInfoDisplay extends ConsumerWidget {
             Text(
               'Document Information',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 16),
             
@@ -35,8 +35,9 @@ class DocumentInfoDisplay extends ConsumerWidget {
               context,
               icon: Icons.category_outlined,
               label: 'Type',
-              value: document.mainType.displayName,
-              valueColor: document.mainType.color,
+              // --- FIX: Used getName() and getColor() from the helper extension ---
+              value: document.mainType.getName(),
+              valueColor: document.mainType.getColor(context),
             ),
             
             const SizedBox(height: 12),
@@ -57,7 +58,8 @@ class DocumentInfoDisplay extends ConsumerWidget {
               context,
               icon: Icons.create_outlined,
               label: 'Created',
-              value: _formatDateTime(document.createdAt),
+              // --- FIX: Changed createdAt to creationDate ---
+              value: _formatDateTime(document.creationDate),
             ),
             
             const SizedBox(height: 12),
@@ -67,7 +69,8 @@ class DocumentInfoDisplay extends ConsumerWidget {
               context,
               icon: Icons.edit_outlined,
               label: 'Last Modified',
-              value: _formatDateTime(document.updatedAt),
+              // --- FIX: Changed updatedAt to updatedDate ---
+              value: _formatDateTime(document.updatedDate),
             ),
             
             // Expiration date (if applicable)
@@ -111,9 +114,9 @@ class DocumentInfoDisplay extends ConsumerWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ),
         const SizedBox(width: 8),
@@ -124,10 +127,10 @@ class DocumentInfoDisplay extends ConsumerWidget {
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: valueColor,
-                  fontFamily: isPath ? 'monospace' : null,
-                  fontSize: isPath ? 12 : null,
-                ),
+                      color: valueColor,
+                      fontFamily: isPath ? 'monospace' : null,
+                      fontSize: isPath ? 12 : null,
+                    ),
               ),
               if (suffix != null) ...[
                 const SizedBox(height: 4),

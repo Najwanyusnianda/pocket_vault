@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
 import '../controllers/edit_document_controller.dart';
-import '../controllers/edit_form_controller.dart';
 import '../widgets/edit_document/edit_document_app_bar.dart';
 import '../widgets/edit_document/edit_document_form.dart';
 
-class EditDocumentScreen extends ConsumerWidget {
+// This is necessary to correctly handle the PopScope logic and lifecycle.
+class EditDocumentScreen extends ConsumerStatefulWidget {
   final Document document;
 
   const EditDocumentScreen({
@@ -17,84 +17,40 @@ class EditDocumentScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Initialize controllers
-    ref.watch(editDocumentControllerProvider(document));
-    ref.watch(editFormControllerProvider(document));
-    
+  ConsumerState<EditDocumentScreen> createState() => _EditDocumentScreenState();
+}
+
+class _EditDocumentScreenState extends ConsumerState<EditDocumentScreen> {
+  @override
+  Widget build(BuildContext context) {
+    // The child widgets (AppBar and Form) are now responsible
+    // for watching the providers they need.
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
         if (didPop) return;
         
-        final controller = ref.read(editDocumentControllerProvider(document).notifier);
+        // --- FIX: Capture the Navigator before the async gap ---
+        final navigator = Navigator.of(context);
+        
+        final controller = ref.read(editDocumentControllerProvider(widget.document).notifier);
         final canClose = await controller.handleBackNavigation(context);
-        if (canClose && context.mounted) {
-          Navigator.of(context).pop();
+        
+        // The 'mounted' check is still good practice here.
+        if (canClose && mounted) {
+          // Use the captured navigator.
+          navigator.pop();
         }
       },
       child: Scaffold(
-        appBar: EditDocumentAppBar(document: document),
+        // Pass the document down to the children. They will handle the providers.
+        appBar: EditDocumentAppBar(document: widget.document),
         body: SingleChildScrollView(
-          child: EditDocumentForm(document: document),
+          // The form logic is now encapsulated in its own widget.
+          child: EditDocumentForm(document: widget.document),
         ),
       ),
     );
   }
 }
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Document title
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Document Title *',
-                  hintText: 'Enter a descriptive title',
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-                textCapitalization: TextCapitalization.words,
-              ),
-              const SizedBox(height: 16),
-
-              // Document type selector
-              DocumentTypeSelector(
-                selectedType: _selectedMainType,
-                onTypeSelected: (type) {
-                  setState(() {
-                    _selectedMainType = type;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Description
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  hintText: 'Add notes or description',
-                ),
-                maxLines: 3,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 16),
-
-              // Expiration date
-              ExpirationDatePicker(
-                selectedDate: _expirationDate,
-                onDateSelected: (date) {
-                  setState(() {
-                    _expirationDate = date;
-                  });
-                },
-

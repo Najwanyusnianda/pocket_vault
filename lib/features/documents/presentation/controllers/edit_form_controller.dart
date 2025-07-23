@@ -2,23 +2,27 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/database/app_database.dart';
 import '../../../../core/database/models/document_type.dart';
-import '../helpers/edit_document_validation_helpers.dart';
+import '../helpers/edit_document_mapping_helpers.dart';
+import 'edit_form_state.dart'; // <-- Import the new state file
 
-/// Controller for edit form field management
-final editFormControllerProvider = StateNotifierProvider.autoDispose<EditFormController, EditFormState>(
-  (ref) => EditFormController(),
+// This provider now creates a unique controller for each document.
+final editFormControllerProvider = StateNotifierProvider.autoDispose.family<EditFormController, EditFormState, Document>(
+  (ref, document) => EditFormController(document),
 );
 
 class EditFormController extends StateNotifier<EditFormState> {
-  EditFormController() : super(const EditFormState.initial());
+  final Document _originalDocument;
 
-  // Text controllers for form fields
+  EditFormController(this._originalDocument) : super(const EditFormState.initial()) {
+    // Initialize the form immediately upon creation
+    initializeForm();
+  }
+
+  // Text controllers are managed here to be accessible by the UI
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
-
-  // Form key for validation
-  final formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -27,277 +31,75 @@ class EditFormController extends StateNotifier<EditFormState> {
     super.dispose();
   }
 
-  /// Initialize form with document data
-  void initializeForm({
-    required String title,
-    required String description,
-    required MainType? documentType,
-    required DateTime? expirationDate,
-    required bool isFavorite,
-  }) {
-    titleController.text = title;
-    descriptionController.text = description;
+  /// Initialize form with the original document data
+  void initializeForm() {
+    final initialFormData = EditDocumentMappingHelpers.documentToFormData(_originalDocument);
+    titleController.text = initialFormData.title;
+    descriptionController.text = initialFormData.description;
     
     state = EditFormState.loaded(
-      documentType: documentType,
-      expirationDate: expirationDate,
-      isFavorite: isFavorite,
-      titleError: null,
-      descriptionError: null,
+      formData: initialFormData,
+      validationErrors: {},
     );
   }
 
-  /// Update document type
+  // --- FIX: All update methods now use public APIs and pattern matching correctly ---
+
+  void updateTitle(String title) {
+    // Use the public extension getter to safely access formData
+    final currentFormData = state.formData;
+    if (currentFormData != null) {
+      // Use the public copyWith on the data class
+      final updatedFormData = currentFormData.copyWith(title: title);
+      // Create a new state with the updated data
+      state = EditFormState.loaded(
+        formData: updatedFormData,
+        validationErrors: state.validationErrors, // Preserve existing errors
+      );
+    }
+  }
+
+  void updateDescription(String description) {
+    final currentFormData = state.formData;
+    if (currentFormData != null) {
+      final updatedFormData = currentFormData.copyWith(description: description);
+      state = EditFormState.loaded(
+        formData: updatedFormData,
+        validationErrors: state.validationErrors,
+      );
+    }
+  }
+
   void updateDocumentType(MainType? type) {
-    state = state.copyWith(documentType: type);
+    final currentFormData = state.formData;
+    if (currentFormData != null) {
+      final updatedFormData = currentFormData.copyWith(mainType: type);
+      state = EditFormState.loaded(
+        formData: updatedFormData,
+        validationErrors: state.validationErrors,
+      );
+    }
   }
 
-  /// Update expiration date
   void updateExpirationDate(DateTime? date) {
-    state = state.copyWith(expirationDate: date);
+    final currentFormData = state.formData;
+    if (currentFormData != null) {
+      final updatedFormData = currentFormData.copyWith(expirationDate: date);
+      state = EditFormState.loaded(
+        formData: updatedFormData,
+        validationErrors: state.validationErrors,
+      );
+    }
   }
 
-  /// Update favorite status
   void updateFavoriteStatus(bool isFavorite) {
-    state = state.copyWith(isFavorite: isFavorite);
-  }
-
-  /// Validate title field
-  void validateTitle() {
-    final error = EditDocumentValidationHelpers.validateTitle(titleController.text);
-    state = state.copyWith(titleError: error);
-  }
-
-  /// Validate description field
-  void validateDescription() {
-    final error = EditDocumentValidationHelpers.validateDescription(descriptionController.text);
-    state = state.copyWith(descriptionError: error);
-  }
-
-  /// Validate all form fields
-  bool validateForm() {
-    validateTitle();
-    validateDescription();
-    
-    final formValid = formKey.currentState?.validate() ?? false;
-    final hasFieldErrors = state.titleError != null || state.descriptionError != null;
-    
-    return formValid && !hasFieldErrors;
-  }
-
-  /// Clear all form fields
-  void clearForm() {
-    titleController.clear();
-    descriptionController.clear();
-    
-    state = const EditFormState.loaded(
-      documentType: null,
-      expirationDate: null,
-      isFavorite: false,
-      titleError: null,
-      descriptionError: null,
-    );
-  }
-
-  /// Reset form validation errors
-  void clearValidationErrors() {
-    state = state.copyWith(
-      titleError: null,
-      descriptionError: null,
-    );
-  }
-
-  /// Check if form has any content
-  bool hasContent() {
-    return titleController.text.trim().isNotEmpty ||
-           descriptionController.text.trim().isNotEmpty ||
-           state.documentType != null ||
-           state.expirationDate != null ||
-           state.isFavorite;
-  }
-
-  /// Get current form data
-  FormData getCurrentFormData() {
-    return FormData(
-      title: titleController.text,
-      description: descriptionController.text,
-      documentType: state.documentType,
-      expirationDate: state.expirationDate,
-      isFavorite: state.isFavorite,
-    );
-  }
-
-  /// Set form focus to title field
-  void focusTitle() {
-    // This would need to be called from the widget with a FocusNode
-  }
-
-  /// Set form focus to description field
-  void focusDescription() {
-    // This would need to be called from the widget with a FocusNode
-  }
-
-  /// Get title character count
-  String getTitleCharacterCount() {
-    return EditDocumentValidationHelpers.getCharacterCount(titleController.text, 255);
-  }
-
-  /// Get description character count
-  String getDescriptionCharacterCount() {
-    return EditDocumentValidationHelpers.getCharacterCount(descriptionController.text, 1000);
-  }
-
-  /// Check if title is approaching character limit
-  bool isTitleApproachingLimit() {
-    return EditDocumentValidationHelpers.isApproachingLimit(titleController.text, 255);
-  }
-
-  /// Check if description is approaching character limit
-  bool isDescriptionApproachingLimit() {
-    return EditDocumentValidationHelpers.isApproachingLimit(descriptionController.text, 1000);
-  }
-
-  /// Check if title exceeds character limit
-  bool titleExceedsLimit() {
-    return EditDocumentValidationHelpers.exceedsLimit(titleController.text, 255);
-  }
-
-  /// Check if description exceeds character limit
-  bool descriptionExceedsLimit() {
-    return EditDocumentValidationHelpers.exceedsLimit(descriptionController.text, 1000);
-  }
-}
-
-/// State class for edit form
-@immutable
-sealed class EditFormState {
-  const EditFormState();
-
-  const factory EditFormState.initial() = _Initial;
-  const factory EditFormState.loaded({
-    required MainType? documentType,
-    required DateTime? expirationDate,
-    required bool isFavorite,
-    required String? titleError,
-    required String? descriptionError,
-  }) = _Loaded;
-}
-
-class _Initial extends EditFormState {
-  const _Initial();
-}
-
-class _Loaded extends EditFormState {
-  final MainType? documentType;
-  final DateTime? expirationDate;
-  final bool isFavorite;
-  final String? titleError;
-  final String? descriptionError;
-
-  const _Loaded({
-    required this.documentType,
-    required this.expirationDate,
-    required this.isFavorite,
-    required this.titleError,
-    required this.descriptionError,
-  });
-}
-
-/// Extension for EditFormState
-extension EditFormStateExtension on EditFormState {
-  bool get isInitial => this is _Initial;
-  bool get isLoaded => this is _Loaded;
-
-  MainType? get documentType => switch (this) {
-    _Loaded(documentType: final type) => type,
-    _ => null,
-  };
-
-  DateTime? get expirationDate => switch (this) {
-    _Loaded(expirationDate: final date) => date,
-    _ => null,
-  };
-
-  bool get isFavorite => switch (this) {
-    _Loaded(isFavorite: final favorite) => favorite,
-    _ => false,
-  };
-
-  String? get titleError => switch (this) {
-    _Loaded(titleError: final error) => error,
-    _ => null,
-  };
-
-  String? get descriptionError => switch (this) {
-    _Loaded(descriptionError: final error) => error,
-    _ => null,
-  };
-
-  bool get hasErrors => titleError != null || descriptionError != null;
-
-  EditFormState copyWith({
-    MainType? documentType,
-    DateTime? expirationDate,
-    bool? isFavorite,
-    String? titleError,
-    String? descriptionError,
-  }) {
-    return switch (this) {
-      _Loaded(
-        documentType: final currentType,
-        expirationDate: final currentDate,
-        isFavorite: final currentFavorite,
-        titleError: final currentTitleError,
-        descriptionError: final currentDescError,
-      ) => EditFormState.loaded(
-        documentType: documentType ?? currentType,
-        expirationDate: expirationDate ?? currentDate,
-        isFavorite: isFavorite ?? currentFavorite,
-        titleError: titleError ?? currentTitleError,
-        descriptionError: descriptionError ?? currentDescError,
-      ),
-      _ => this,
-    };
-  }
-}
-
-/// Data class for form data
-class FormData {
-  final String title;
-  final String description;
-  final MainType? documentType;
-  final DateTime? expirationDate;
-  final bool isFavorite;
-
-  const FormData({
-    required this.title,
-    required this.description,
-    required this.documentType,
-    required this.expirationDate,
-    required this.isFavorite,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is FormData &&
-          runtimeType == other.runtimeType &&
-          title == other.title &&
-          description == other.description &&
-          documentType == other.documentType &&
-          expirationDate == other.expirationDate &&
-          isFavorite == other.isFavorite;
-
-  @override
-  int get hashCode =>
-      title.hashCode ^
-      description.hashCode ^
-      documentType.hashCode ^
-      expirationDate.hashCode ^
-      isFavorite.hashCode;
-
-  @override
-  String toString() {
-    return 'FormData{title: $title, description: $description, documentType: $documentType, expirationDate: $expirationDate, isFavorite: $isFavorite}';
+    final currentFormData = state.formData;
+    if (currentFormData != null) {
+      final updatedFormData = currentFormData.copyWith(isFavorite: isFavorite);
+      state = EditFormState.loaded(
+        formData: updatedFormData,
+        validationErrors: state.validationErrors,
+      );
+    }
   }
 }

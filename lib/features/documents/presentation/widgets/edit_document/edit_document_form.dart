@@ -3,8 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/database/app_database.dart';
-import '../../controllers/edit_form_controller.dart';
 import '../../controllers/edit_document_controller.dart';
+//import '../../controllers/edit_document_state.dart';
+
 import 'form_fields/title_field.dart';
 import 'form_fields/description_field.dart';
 import 'form_fields/favorite_toggle.dart';
@@ -20,43 +21,35 @@ class EditDocumentForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formState = ref.watch(editFormControllerProvider(document));
+    // We watch the state to rebuild the UI when data changes.
     final editState = ref.watch(editDocumentControllerProvider(document));
+    // We read the controller to call its methods.
+    final editController = ref.read(editDocumentControllerProvider(document).notifier);
     
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Title field
+          // These child widgets will now internally use the same provider
           TitleField(document: document),
-          
           const SizedBox(height: 16),
-          
-          // Description field
           DescriptionField(document: document),
-          
           const SizedBox(height: 24),
-          
-          // Favorite toggle
           FavoriteToggle(document: document),
-          
           const SizedBox(height: 24),
-          
-          // Document information display
           DocumentInfoDisplay(document: document),
-          
           const SizedBox(height: 24),
           
-          // Validation errors summary (if any)
-          if (formState.validationErrors?.isNotEmpty == true) ...[
-            _buildErrorSummary(formState.validationErrors!),
+          // Accessing validation errors from the correct state property
+          if (editState.validation?.errors.isNotEmpty == true) ...[
+            _buildErrorSummary(editState.validation!.errors),
             const SizedBox(height: 16),
           ],
           
-          // Changes summary (if there are unsaved changes)
+          // --- FIX: Called getChangesSummary() on the controller, not the state ---
           if (editState.hasUnsavedChanges) ...[
-            _buildChangesSummary(context, editState.changesSummary),
+            _buildChangesSummary(context, editController.getChangesSummary()),
             const SizedBox(height: 16),
           ],
         ],

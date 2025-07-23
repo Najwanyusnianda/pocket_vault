@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/database/app_database.dart';
 import '../../../controllers/edit_form_controller.dart';
+import '../../../controllers/edit_form_controller.dart';
+import '../../../controllers/edit_form_state.dart';
 
 class TitleField extends ConsumerWidget {
   final Document document;
@@ -18,8 +20,8 @@ class TitleField extends ConsumerWidget {
     final formState = ref.watch(editFormControllerProvider(document));
     final formController = ref.read(editFormControllerProvider(document).notifier);
     
-    final titleError = formState.validationErrors?['title'];
-    final titleLength = formState.formData.title.length;
+    final titleError = formState.validationErrors['title'];
+    final titleLength = formState.formData!.title.length;
     const maxLength = 255;
     
     return Column(

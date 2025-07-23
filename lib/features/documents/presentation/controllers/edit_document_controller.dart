@@ -1,15 +1,4 @@
-// lib/features/documents/presentation/controllers/edit_docum  /// Update favorite status
-  void updateFavorite(bool isFavorite) {
-    _formData = _formData.copyWith(isFavorite: isFavorite);
-    _updateStateWithValidation();
-  }
-
-  /// Reset form to original values
-  void resetForm() {
-    _formData = EditDocumentMappingHelpers.documentToFormData(_originalDocument);
-    state = EditDocumentState.loaded(_formData);
-  }ontroller.dart
-
+// lib/features/documents/presentation/controllers/edit_document_controller.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +6,8 @@ import '../../../../core/database/app_database.dart';
 import '../providers/document_providers.dart';
 import '../helpers/edit_document_mapping_helpers.dart';
 import '../helpers/edit_document_validation_helpers.dart';
+import '../../../../core/database/models/document_type.dart';
+
 
 /// Controller for edit document screen business logic
 final editDocumentControllerProvider = StateNotifierProvider.family<EditDocumentController, EditDocumentState, Document>(
@@ -38,6 +29,11 @@ class EditDocumentController extends StateNotifier<EditDocumentState> {
     _formData = EditDocumentMappingHelpers.documentToFormData(_originalDocument);
     state = EditDocumentState.loaded(_formData);
   }
+  void updateFavorite(bool isFavorite) {
+    _formData = _formData.copyWith(isFavorite: isFavorite);
+    _updateStateWithValidation();
+  }
+
 
   /// Get current form data
   EditDocumentFormData get formData => _formData;

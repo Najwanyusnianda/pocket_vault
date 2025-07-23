@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/database/app_database.dart';
 import '../../../controllers/edit_form_controller.dart';
+import '../../../controllers/edit_form_state.dart';
+
 
 class DescriptionField extends ConsumerWidget {
   final Document document;
@@ -17,9 +19,9 @@ class DescriptionField extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formState = ref.watch(editFormControllerProvider(document));
     final formController = ref.read(editFormControllerProvider(document).notifier);
-    
-    final descriptionError = formState.validationErrors?['description'];
-    final descriptionLength = formState.formData.description?.length ?? 0;
+
+    final descriptionError = formState.validationErrors['description'];
+    final descriptionLength = formState.formData!.description.length;
     const maxLength = 1000;
     
     return Column(

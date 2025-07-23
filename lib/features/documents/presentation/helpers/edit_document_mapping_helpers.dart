@@ -3,6 +3,7 @@
 import 'package:drift/drift.dart' as drift;
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/models/document_type.dart';
+import 'document_type_helpers.dart'; 
 
 /// Helper class for mapping between document entities and form data
 class EditDocumentMappingHelpers {
