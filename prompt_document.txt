@@ -40,3 +40,10 @@ lib/features/documents/presentation/providers/document_providers.dart
 lib/features/documents/presentation/controllers/
 lib/features/documents/presentation/helpers/
 lib/features/documents/presentation/widgets/
+
+
+Before Write code, please write your implementation planning
+and check this folder for understanding the UI State Controller:
+lib/features/documents/presentation/controllers/document_detail_controller
+lib/features/documents/presentation/helpers/file_viewer_helpers
+lib/features/documents/presentation/widgets/document_detail

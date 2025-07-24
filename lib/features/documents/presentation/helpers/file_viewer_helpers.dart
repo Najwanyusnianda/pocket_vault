@@ -37,7 +37,7 @@ class FileViewerHelpers {
         displayName: 'PDF Document',
         icon: Icons.picture_as_pdf,
         color: Colors.red,
-        canPreview: false, // Will be true when PDF viewer is implemented
+        canPreview: true, // Changed from false - PDF viewer is now implemented
       );
     } else {
       return FileTypeInfo(

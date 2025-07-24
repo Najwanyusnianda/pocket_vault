@@ -1,59 +1,76 @@
-// In lib/navigation/app_router.dart
-import 'package:flutter/foundation.dart';
+// lib/navigation/app_router.dart
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pocket_vault/features/documents/presentation/screens/document_list_screen.dart';
+import 'package:pocket_vault/core/database/app_database.dart';
+import 'package:pocket_vault/core/services/file_picker_service.dart';
 import 'package:pocket_vault/features/documents/presentation/screens/add_document_screen.dart';
 import 'package:pocket_vault/features/documents/presentation/screens/document_detail_screen.dart';
+import 'package:pocket_vault/features/documents/presentation/screens/document_list_screen.dart';
 import 'package:pocket_vault/features/documents/presentation/screens/edit_document_screen.dart';
-import 'package:pocket_vault/core/services/file_picker_service.dart';
-import 'package:pocket_vault/core/database/app_database.dart';
 
-// Create a provider for your router
+// Provider to make the router accessible throughout the app
 final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
+    debugLogDiagnostics: true, // Helpful for debugging navigation issues
     routes: [
+      // Route for the main document list screen
       GoRoute(
         path: '/',
+        name: 'home',
         builder: (context, state) => const DocumentListScreen(),
       ),
+
+      // Route for the "Add Document" quicksave screen
       GoRoute(
         path: '/add-document',
+        name: 'addDocument',
         builder: (context, state) {
-          // 🔍 DEBUGGING: Log navigation details
-          debugPrint('🏗️ [Router] Navigated to /add-document. Extra is: ${state.extra}');
-          
-          final fileResult = state.extra as FilePickerResult?;
-          if (fileResult != null) {
-            debugPrint('🏗️ [Router] File found: ${fileResult.fileName}');
+          // This screen requires a FilePickerResult to be passed.
+          // We safely check if the 'extra' data exists and is the correct type.
+          if (state.extra != null && state.extra is FilePickerResult) {
+            final fileResult = state.extra as FilePickerResult;
             return AddDocumentScreen(fileResult: fileResult);
           }
           
-          // Handle case where file is null - could be manual entry
-          debugPrint('🏗️ [Router] No file provided, creating empty screen');
-          return const AddDocumentScreen(fileResult: null);
+          // If no file is provided, it's an invalid navigation attempt.
+          // We redirect to the home screen as a safe fallback.
+          // A more advanced implementation could show an error page.
+          return const DocumentListScreen();
         },
       ),
 
+      // Route for viewing a single document's details
       GoRoute(
         path: '/document/:id',
+        name: 'documentDetail',
         builder: (context, state) {
-          final documentId = int.parse(state.pathParameters['id']!);
-          return DocumentDetailScreen(documentId: documentId);
+          // Safely parse the document ID from the URL path parameter.
+          final documentId = int.tryParse(state.pathParameters['id'] ?? '');
+          if (documentId != null) {
+            return DocumentDetailScreen(documentId: documentId);
+          }
+          // If the ID is invalid, fall back to the home screen.
+          return const DocumentListScreen();
         },
         routes: [
+          // Nested route for editing a document
           GoRoute(
-            path: 'edit',
+            path: 'edit', // This will result in a URL like /document/123/edit
+            name: 'editDocument',
             builder: (context, state) {
-              final document = state.extra as Document;
-              return EditDocumentScreen(document: document);
+              // The Document object is passed as 'extra' to pre-fill the form.
+              if (state.extra != null && state.extra is Document) {
+                final document = state.extra as Document;
+                return EditDocumentScreen(document: document);
+              }
+              // If no document is provided, fall back to the home screen.
+              return const DocumentListScreen();
             },
           ),
         ],
       ),
-
-      // Add other routes here as you build them
     ],
   );
 });
