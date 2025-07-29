@@ -7,11 +7,11 @@ final cardTheme = CardThemeData(
   color: lightColorScheme.surface,
   surfaceTintColor: Colors.transparent,
   elevation: 0.5,
-  shadowColor: lightColorScheme.shadow.withOpacity(0.1),
+  shadowColor: lightColorScheme.shadow.withValues(alpha:0.1),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(12),
     side: BorderSide(
-      color: lightColorScheme.outline.withOpacity(0.1),
+      color: lightColorScheme.outline.withValues(alpha:0.1),
       width: 0.5,
     ),
   ),

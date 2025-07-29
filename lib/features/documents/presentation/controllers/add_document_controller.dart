@@ -19,10 +19,18 @@ class AddDocumentController extends StateNotifier<AsyncValue<FilePickerResult?>>
     state = await AsyncValue.guard(() async {
       debugPrint('🎯 [Controller] Starting takePhoto()');
       final result = await _filePickerService.pickImageFromCamera();
+      
+      // ✅ FIX: Handle cancellation gracefully
+      if (result.file == null && result.error == null) {
+        debugPrint('ℹ️ [Controller] Photo taking cancelled by user');
+        return null; // Return null for cancellation, not an error
+      }
+      
       if (result.isSuccess) {
         debugPrint('✅ [Controller] Photo picked successfully: ${result.file?.path}');
         return result;
       }
+      
       debugPrint('❌ [Controller] Photo picking failed: ${result.error}');
       throw result.error ?? 'Failed to take photo';
     });
@@ -33,10 +41,18 @@ class AddDocumentController extends StateNotifier<AsyncValue<FilePickerResult?>>
     state = await AsyncValue.guard(() async {
       debugPrint('🎯 [Controller] Starting chooseFile()');
       final result = await _filePickerService.pickFile();
+      
+      // ✅ FIX: Handle cancellation gracefully
+      if (result.file == null && result.error == null) {
+        debugPrint('ℹ️ [Controller] File picking cancelled by user');
+        return null; // Return null for cancellation, not an error
+      }
+      
       if (result.isSuccess) {
         debugPrint('✅ [Controller] File picked successfully: ${result.file?.path}');
         return result;
       }
+      
       debugPrint('❌ [Controller] File picking failed: ${result.error}');
       throw result.error ?? 'Failed to pick file';
     });

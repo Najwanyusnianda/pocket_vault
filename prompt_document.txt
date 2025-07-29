@@ -47,3 +47,31 @@ and check this folder for understanding the UI State Controller:
 lib/features/documents/presentation/controllers/document_detail_controller
 lib/features/documents/presentation/helpers/file_viewer_helpers
 lib/features/documents/presentation/widgets/document_detail
+
+
+
+
+
+File: // lib/features/documents/presentation/screens/document_list_screen.dart (check UI widgets dependency of this code to make clean code and structure)
+
+Before Write code, please write your implementation planning. And Ask For my confirmation.
+
+please check this folder for understanding database, repository, provider, and current UI widget state (you can add more function if needed):
+
+lib/core/database/app_database.dart
+
+lib/core/database/daos/documents_dao.dart
+
+lib/core/database/models/document_type.dart
+
+lib/core/database/tables/documents_table.dart
+
+lib/features/documents/data/repositories/document_repository.dart
+
+lib/features/documents/data/repositories/document_repository_impl.dart
+
+lib/features/documents/presentation/providers/document_providers.dart
+
+lib/features/documents/presentation/controllers/
+lib/features/documents/presentation/helpers/
+lib/features/documents/presentation/widgets/document_list

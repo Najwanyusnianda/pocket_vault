@@ -110,7 +110,7 @@ class AddDocumentSourceSheet extends ConsumerWidget {
                   Text(
                     subtitle,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.7),
+                      color: colorScheme.onSurface.withValues(alpha:0.7),
                     ),
                   ),
                 ],
@@ -119,7 +119,7 @@ class AddDocumentSourceSheet extends ConsumerWidget {
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: colorScheme.onSurface.withOpacity(0.5),
+              color: colorScheme.onSurface.withValues(alpha:0.5),
             ),
           ],
         ),

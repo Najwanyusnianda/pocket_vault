@@ -39,7 +39,7 @@ class FilePickerService {
       );
 
       if (image == null) {
-        return FilePickerResult(error: 'No image selected');
+        return FilePickerResult(); // No error, just no image selected
       }
 
       final file = File(image.path);
@@ -67,7 +67,7 @@ class FilePickerService {
       );
 
       if (image == null) {
-        return FilePickerResult(error: 'No image selected');
+        return FilePickerResult(); // No error, just no image selected
       }
 
       final file = File(image.path);
@@ -93,8 +93,9 @@ class FilePickerService {
         allowMultiple: false,
       );
 
+      // ✅ FIX: Handle cancellation gracefully - return success with null file
       if (result == null || result.files.isEmpty) {
-        return FilePickerResult(error: 'No file selected');
+        return FilePickerResult(); // No error, just no file selected
       }
 
       final platformFile = result.files.first;

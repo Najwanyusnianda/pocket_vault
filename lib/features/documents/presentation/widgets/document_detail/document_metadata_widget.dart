@@ -158,7 +158,7 @@ class DocumentMetadataRow extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: iconColor ?? theme.colorScheme.onSurface.withOpacity(0.6),
+            color: iconColor ?? theme.colorScheme.onSurface.withValues(alpha:0.6),
           ),
           const SizedBox(width: 12),
         ],
@@ -169,7 +169,7 @@ class DocumentMetadataRow extends StatelessWidget {
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withValues(alpha:0.7),
                   fontWeight: FontWeight.w500,
                 ),
               ),

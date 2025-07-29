@@ -29,6 +29,9 @@ class Documents extends Table {
   DateTimeColumn get updatedDate => dateTime()();
   DateTimeColumn get expirationDate => dateTime().nullable()();
 
+  // JSON string for storing dynamic custom fields based on document subType
+  TextColumn get customFields => text().nullable()();
+
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
 }

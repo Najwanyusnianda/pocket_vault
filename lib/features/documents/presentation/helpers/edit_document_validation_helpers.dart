@@ -128,7 +128,7 @@ class EditDocumentValidationHelpers {
 
   /// Gets validation color based on character count
   static Color? getValidationColor(BuildContext context, String? text, int maxLength) {
-    final currentLength = text?.length ?? 0;
+    //final currentLength = text?.length ?? 0;
     final colorScheme = Theme.of(context).colorScheme;
     
     if (exceedsLimit(text, maxLength)) {

@@ -54,7 +54,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: widget.isFullScreen ? BorderRadius.zero : BorderRadius.circular(12),
-          border: widget.isFullScreen ? null : Border.all(color: colorScheme.outline.withOpacity(0.2)),
+          border: widget.isFullScreen ? null : Border.all(color: colorScheme.outline.withValues(alpha:0.2)),
         ),
         child: const Center(
           child: Text('PDF file not found'),
@@ -107,15 +107,19 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             ),
           );
 
-    if (widget.isFullScreen) {
-      // Full-screen mode: no container wrapper, just the PDF viewer with controls
-      return Column(
-        children: [
-          _buildControlBar(context, theme, colorScheme),
-          Expanded(child: pdfViewer),
-        ],
-      );
-    }
+  if (widget.isFullScreen) {
+    // Full-screen mode with proper safe area handling
+    return Column(
+      children: [
+        // ✅ FIX: Wrap control bar in SafeArea
+        SafeArea(
+          bottom: false, // Don't add bottom padding - let PDF extend to bottom
+          child: _buildControlBar(context, theme, colorScheme),
+        ),
+        Expanded(child: pdfViewer),
+      ],
+    );
+  }
 
     // Regular mode: with container wrapper
     return Container(
@@ -125,16 +129,16 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
+          color: colorScheme.outline.withValues(alpha:0.2),
         ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Column(
           children: [
+
             // PDF Controls
             _buildControlBar(context, theme, colorScheme),
-
             // PDF Viewer
             Expanded(child: pdfViewer),
           ],
@@ -150,7 +154,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         color: colorScheme.surfaceContainerHighest,
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outline.withOpacity(0.2),
+            color: colorScheme.outline.withValues(alpha:0.2),
           ),
         ),
       ),

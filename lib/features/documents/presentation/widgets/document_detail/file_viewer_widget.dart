@@ -113,7 +113,7 @@ class FileViewerWidget extends StatelessWidget {
             child: Text(
               placeholderInfo.subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                   ),
               textAlign: TextAlign.center,
             ),
@@ -135,7 +135,7 @@ class FileViewerWidget extends StatelessWidget {
     return Container(
       // Removed height and margin
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha:0.1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -159,7 +159,7 @@ class FileViewerWidget extends StatelessWidget {
             child: Text(
               errorInfo.message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                   ),
               textAlign: TextAlign.center,
             ),

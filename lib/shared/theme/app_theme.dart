@@ -16,68 +16,39 @@ final ThemeData appTheme = ThemeData(
   colorScheme: lightColorScheme,
   textTheme: nunitoTextTheme,
 
-  // Component Themes
-  appBarTheme: appBarTheme,
-  elevatedButtonTheme: elevatedButtonTheme,
-  filledButtonTheme: filledButtonTheme,
-  outlinedButtonTheme: outlinedButtonTheme,
-  textButtonTheme: textButtonTheme,
-  floatingActionButtonTheme: floatingActionButtonTheme,
+  // Enhanced Component Themes
+  appBarTheme: lightAppBarTheme, // Updated to use enhanced theme
+  elevatedButtonTheme: lightElevatedButtonTheme, // Updated to use enhanced theme
+  filledButtonTheme: lightFilledButtonTheme, // Updated to use enhanced theme
+  outlinedButtonTheme: lightOutlinedButtonTheme, // Updated to use enhanced theme
+  textButtonTheme: lightTextButtonTheme, // Updated to use enhanced theme
+  floatingActionButtonTheme: lightFloatingActionButtonTheme, // Updated to use enhanced theme
   cardTheme: cardTheme,
-  inputDecorationTheme: inputDecorationTheme,
-  listTileTheme: listTileTheme,
-  bottomSheetTheme: bottomSheetTheme,
+  inputDecorationTheme: lightInputDecorationTheme, // Already updated
+  listTileTheme: lightListTileTheme, // Updated to use enhanced theme
+  bottomSheetTheme: lightBottomSheetTheme, // Updated to use enhanced theme
 );
 
-// Dark theme with dark color scheme
+// Dark theme with enhanced dark color scheme
 final ThemeData darkAppTheme = ThemeData(
   useMaterial3: true,
   colorScheme: darkColorScheme,
   textTheme: nunitoTextTheme,
 
-  // Component Themes (you can create dark variants if needed)
-  appBarTheme: appBarTheme.copyWith(
-    backgroundColor: darkColorScheme.surface,
-    foregroundColor: darkColorScheme.onSurface,
-    iconTheme: IconThemeData(color: darkColorScheme.onSurface),
-    actionsIconTheme: IconThemeData(color: darkColorScheme.onSurface),
-  ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-    style: elevatedButtonTheme.style?.copyWith(
-      backgroundColor: WidgetStateProperty.all(darkColorScheme.primary),
-      foregroundColor: WidgetStateProperty.all(darkColorScheme.onPrimary),
-    ),
-  ),
+  // Enhanced Dark Component Themes
+  appBarTheme: darkAppBarTheme, // Updated to use enhanced dark theme
+  elevatedButtonTheme: darkElevatedButtonTheme, // Updated to use enhanced dark theme
+  filledButtonTheme: darkFilledButtonTheme, // Updated to use enhanced dark theme
+  outlinedButtonTheme: darkOutlinedButtonTheme, // Updated to use enhanced dark theme
+  textButtonTheme: darkTextButtonTheme, // Updated to use enhanced dark theme
+  floatingActionButtonTheme: darkFloatingActionButtonTheme, // Updated to use enhanced dark theme
   cardTheme: cardTheme.copyWith(
     color: darkColorScheme.surface,
     surfaceTintColor: darkColorScheme.surfaceTint,
   ),
-  inputDecorationTheme: inputDecorationTheme.copyWith(
-    fillColor: darkColorScheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: darkColorScheme.outline),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: darkColorScheme.outline),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: darkColorScheme.primary, width: 2),
-    ),
-  ),
-  listTileTheme: listTileTheme.copyWith(
-    tileColor: darkColorScheme.surface,
-    selectedTileColor: darkColorScheme.primaryContainer,
-    selectedColor: darkColorScheme.onPrimaryContainer,
-    textColor: darkColorScheme.onSurface,
-    iconColor: darkColorScheme.primary,
-  ),
-  bottomSheetTheme: bottomSheetTheme.copyWith(
-    backgroundColor: darkColorScheme.surface,
-    surfaceTintColor: darkColorScheme.surfaceTint,
-  ),
+  inputDecorationTheme: darkInputDecorationTheme, // Already updated
+  listTileTheme: darkListTileTheme, // Updated to use enhanced dark theme
+  bottomSheetTheme: darkBottomSheetTheme, // Updated to use enhanced dark theme
 );
 
 // Riverpod providers for theme management

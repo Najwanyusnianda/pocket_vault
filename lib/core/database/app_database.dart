@@ -20,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1; // Increment this when you change tables
+  int get schemaVersion => 2; // Increment for customFields column addition
 }
 
 LazyDatabase _openConnection() {

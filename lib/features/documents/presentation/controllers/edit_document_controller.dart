@@ -55,13 +55,57 @@ class EditDocumentController extends StateNotifier<EditDocumentState> {
 
   /// Update document type
   void updateDocumentType(MainType? type) {
-    _formData = _formData.copyWith(mainType: type);
+    // Clear subType if it's not valid for the new mainType
+    SubType? currentSubType = _formData.subType;
+    SubType? validSubType = currentSubType;
+    
+    if (type != null && currentSubType != null) {
+      final availableSubTypes = documentTypeHierarchy[type] ?? [];
+      if (!availableSubTypes.contains(currentSubType)) {
+        validSubType = null; // Clear invalid subType
+      }
+    }
+    
+    _formData = _formData.copyWith(
+      mainType: type,
+      subType: validSubType,
+    );
+    _updateStateWithValidation();
+  }
+
+  /// Update document sub type
+  void updateSubType(SubType? subType) {
+    _formData = _formData.copyWith(subType: subType);
+    _updateStateWithValidation();
+  }
+
+  /// Update tags
+  void updateTags(String tags) {
+    _formData = _formData.copyWith(tags: tags);
+    _updateStateWithValidation();
+  }
+
+  /// Update archive status
+  void updateArchiveStatus(bool isArchived) {
+    _formData = _formData.copyWith(isArchived: isArchived);
     _updateStateWithValidation();
   }
 
   /// Update expiration date
   void updateExpirationDate(DateTime? date) {
     _formData = _formData.copyWith(expirationDate: date);
+    _updateStateWithValidation();
+  }
+
+  /// Update custom field value
+  void updateCustomField(String key, dynamic value) {
+    final updatedCustomFields = Map<String, dynamic>.from(_formData.customFields);
+    if (value == null) {
+      updatedCustomFields.remove(key);
+    } else {
+      updatedCustomFields[key] = value;
+    }
+    _formData = _formData.copyWith(customFields: updatedCustomFields);
     _updateStateWithValidation();
   }
 

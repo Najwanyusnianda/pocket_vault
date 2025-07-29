@@ -27,7 +27,7 @@ class SaveButtonWidget extends ConsumerWidget {
         color: colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: colorScheme.outline.withOpacity(0.2),
+            color: colorScheme.outline.withValues(alpha:0.2),
             width: 1,
           ),
         ),

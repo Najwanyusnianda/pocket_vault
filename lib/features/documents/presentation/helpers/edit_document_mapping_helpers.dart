@@ -3,6 +3,7 @@
 import 'package:drift/drift.dart' as drift;
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/models/document_type.dart';
+import 'dart:convert';
 import 'document_type_helpers.dart'; 
 
 /// Helper class for mapping between document entities and form data
@@ -11,11 +12,29 @@ class EditDocumentMappingHelpers {
 
   /// Maps a Document entity to form data
   static EditDocumentFormData documentToFormData(Document document) {
+    // Parse custom fields from JSON string
+    Map<String, dynamic> customFields = {};
+    
+    try {
+      // Use the new database field after build_runner regeneration
+      final customFieldsJson = document.customFields;
+      if (customFieldsJson != null && customFieldsJson.isNotEmpty) {
+        customFields = Map<String, dynamic>.from(
+          jsonDecode(customFieldsJson) as Map
+        );
+      }
+    } catch (e) {
+      customFields = {};
+    }
+
     return EditDocumentFormData(
       id: document.id,
       title: document.title,
       description: document.description ?? '',
       mainType: document.mainType,
+      subType: document.subType,
+      tags: document.tags ?? '',
+      customFields: customFields,
       expirationDate: document.expirationDate,
       isFavorite: document.isFavorite,
       filePath: document.filePath,
@@ -50,6 +69,9 @@ class EditDocumentMappingHelpers {
     String? title,
     String? description,
     MainType? mainType,
+    SubType? subType,
+    String? tags,
+    Map<String, dynamic>? customFields,
     DateTime? expirationDate,
     bool? isFavorite,
   }) {
@@ -58,6 +80,9 @@ class EditDocumentMappingHelpers {
       title: title ?? original.title,
       description: description ?? original.description,
       mainType: mainType ?? original.mainType,
+      subType: subType ?? original.subType,
+      tags: tags ?? original.tags,
+      customFields: customFields ?? original.customFields,
       expirationDate: expirationDate ?? original.expirationDate,
       isFavorite: isFavorite ?? original.isFavorite,
       filePath: original.filePath,
@@ -152,6 +177,9 @@ class EditDocumentMappingHelpers {
       title: original.title,
       description: original.description,
       mainType: original.mainType,
+      subType: original.subType,
+      tags: original.tags,
+      customFields: Map<String, dynamic>.from(original.customFields),
       expirationDate: original.expirationDate,
       isFavorite: original.isFavorite,
       filePath: original.filePath,
@@ -173,6 +201,9 @@ class EditDocumentFormData {
   final String title;
   final String description;
   final MainType? mainType;
+  final SubType? subType;
+  final String tags;
+  final Map<String, dynamic> customFields;
   final DateTime? expirationDate;
   final bool isFavorite;
   final String filePath;
@@ -185,6 +216,9 @@ class EditDocumentFormData {
     required this.title,
     required this.description,
     required this.mainType,
+    this.subType,
+    required this.tags,
+    required this.customFields,
     required this.expirationDate,
     required this.isFavorite,
     required this.filePath,
@@ -199,6 +233,9 @@ class EditDocumentFormData {
     String? title,
     String? description,
     MainType? mainType,
+    SubType? subType,
+    String? tags,
+    Map<String, dynamic>? customFields,
     DateTime? expirationDate,
     bool? isFavorite,
     String? filePath,
@@ -211,6 +248,9 @@ class EditDocumentFormData {
       title: title ?? this.title,
       description: description ?? this.description,
       mainType: mainType ?? this.mainType,
+      subType: subType ?? this.subType,
+      tags: tags ?? this.tags,
+      customFields: customFields ?? this.customFields,
       expirationDate: expirationDate ?? this.expirationDate,
       isFavorite: isFavorite ?? this.isFavorite,
       filePath: filePath ?? this.filePath,
@@ -229,6 +269,9 @@ class EditDocumentFormData {
           title == other.title &&
           description == other.description &&
           mainType == other.mainType &&
+          subType == other.subType &&
+          tags == other.tags &&
+          customFields.toString() == other.customFields.toString() &&
           expirationDate == other.expirationDate &&
           isFavorite == other.isFavorite &&
           filePath == other.filePath &&
@@ -242,6 +285,9 @@ class EditDocumentFormData {
       title.hashCode ^
       description.hashCode ^
       mainType.hashCode ^
+      subType.hashCode ^
+      tags.hashCode ^
+      customFields.toString().hashCode ^
       expirationDate.hashCode ^
       isFavorite.hashCode ^
       filePath.hashCode ^
@@ -251,6 +297,6 @@ class EditDocumentFormData {
 
   @override
   String toString() {
-    return 'EditDocumentFormData{id: $id, title: $title, description: $description, mainType: $mainType, expirationDate: $expirationDate, isFavorite: $isFavorite}';
+    return 'EditDocumentFormData{id: $id, title: $title, description: $description, mainType: $mainType, subType: $subType, tags: $tags, expirationDate: $expirationDate, isFavorite: $isFavorite, isArchived: $isArchived}';
   }
 }

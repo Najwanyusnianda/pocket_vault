@@ -1,5 +1,4 @@
 // lib/navigation/app_router.dart
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pocket_vault/core/database/app_database.dart';
@@ -8,6 +7,10 @@ import 'package:pocket_vault/features/documents/presentation/screens/add_documen
 import 'package:pocket_vault/features/documents/presentation/screens/document_detail_screen.dart';
 import 'package:pocket_vault/features/documents/presentation/screens/document_list_screen.dart';
 import 'package:pocket_vault/features/documents/presentation/screens/edit_document_screen.dart';
+import 'package:pocket_vault/features/shell/presentation/screens/main_shell_screen.dart';
+import 'package:pocket_vault/features/bundles/presentation/screens/bundles_screen.dart';
+import 'package:pocket_vault/features/reminders/presentation/screens/reminders_screen.dart';
+import 'package:pocket_vault/features/settings/presentation/screens/settings_screen.dart';
 
 // Provider to make the router accessible throughout the app
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -15,14 +18,37 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     debugLogDiagnostics: true, // Helpful for debugging navigation issues
     routes: [
-      // Route for the main document list screen
-      GoRoute(
-        path: '/',
-        name: 'home',
-        builder: (context, state) => const DocumentListScreen(),
+      // ShellRoute wraps all main screens with the BottomNavigationBar
+      ShellRoute(
+        builder: (context, state, child) {
+          return MainShellScreen(child: child);
+        },
+        routes: [
+          // Main screens that will have the bottom navigation bar
+          GoRoute(
+            path: '/',
+            name: 'home',
+            builder: (context, state) => const DocumentListScreen(),
+          ),
+          GoRoute(
+            path: '/bundles',
+            name: 'bundles',
+            builder: (context, state) => const BundlesScreen(),
+          ),
+          GoRoute(
+            path: '/reminders',
+            name: 'reminders',
+            builder: (context, state) => const RemindersScreen(),
+          ),
+          GoRoute(
+            path: '/settings',
+            name: 'settings',
+            builder: (context, state) => const SettingsScreen(),
+          ),
+        ],
       ),
 
-      // Route for the "Add Document" quicksave screen
+      // Top-level routes that do NOT show the bottom navigation bar
       GoRoute(
         path: '/add-document',
         name: 'addDocument',

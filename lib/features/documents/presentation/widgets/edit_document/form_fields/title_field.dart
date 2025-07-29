@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/database/app_database.dart';
 import '../../../controllers/edit_form_controller.dart';
-import '../../../controllers/edit_form_controller.dart';
 import '../../../controllers/edit_form_state.dart';
 
 class TitleField extends ConsumerWidget {

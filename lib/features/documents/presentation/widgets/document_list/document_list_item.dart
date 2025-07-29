@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/database/app_database.dart';
 import '../../helpers/document_type_helpers.dart'; // <-- Import the new extension file
+import '../document_actions_menu.dart';
 
 class DocumentListItem extends StatelessWidget {
   final Document document;
@@ -26,7 +27,7 @@ class DocumentListItem extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: colorScheme.outline.withOpacity(0.2),
+              color: colorScheme.outline.withValues(alpha:0.2),
               width: 1,
             ),
           ),
@@ -54,7 +55,7 @@ class DocumentListItem extends StatelessWidget {
                   Text(
                     _getSubtitleText(),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.7),
+                      color: colorScheme.onSurface.withValues(alpha:0.7),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -98,12 +99,22 @@ class DocumentListItem extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: badges,
           ),
-        IconButton(
-          icon: const Icon(Icons.more_vert),
-          iconSize: 20,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          onPressed: () {
-            // TODO: Show actions menu
+        DocumentActionsMenu(
+          documentId: document.id,
+          documentTitle: document.title,
+          isFavorite: document.isFavorite,
+          onEdit: () => context.go('/document/${document.id}/edit', extra: document),
+          onDeleted: () {
+            // The DocumentActionsMenu will handle this callback when deletion is successful
+            // We might want to refresh the list or navigate back if needed
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Document deleted successfully'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
           },
         ),
       ],

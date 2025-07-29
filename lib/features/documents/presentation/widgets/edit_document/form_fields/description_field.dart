@@ -67,10 +67,10 @@ class DescriptionField extends ConsumerWidget {
         ],
         
         // Helpful tips for description
-        if (descriptionLength == 0) ...[
-          const SizedBox(height: 8),
-          _buildDescriptionTips(),
-        ],
+        // if (descriptionLength == 0) ...[
+        //   const SizedBox(height: 8),
+        //   _buildDescriptionTips(),
+        // ],
       ],
     );
   }
@@ -112,49 +112,49 @@ class DescriptionField extends ConsumerWidget {
     );
   }
 
-  Widget _buildDescriptionTips() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.lightbulb_outline, size: 16, color: Colors.blue.shade700),
-              const SizedBox(width: 6),
-              Text(
-                'Tips for a good description:',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue.shade700,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ...const [
-            '• Summarize the document\'s main content',
-            '• Include relevant keywords for searching',
-            '• Note important dates or deadlines',
-            '• Add context that isn\'t obvious from the title',
-          ].map((tip) => Padding(
-            padding: const EdgeInsets.only(left: 22, bottom: 2),
-            child: Text(
-              tip,
-              style: TextStyle(
-                color: Colors.blue.shade700,
-                fontSize: 11,
-              ),
-            ),
-          )),
-        ],
-      ),
-    );
-  }
+  // Widget _buildDescriptionTips() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(12),
+  //     decoration: BoxDecoration(
+  //       color: Colors.blue.shade50,
+  //       borderRadius: BorderRadius.circular(8),
+  //       border: Border.all(color: Colors.blue.shade200),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Icon(Icons.lightbulb_outline, size: 16, color: Colors.blue.shade700),
+  //             const SizedBox(width: 6),
+  //             Text(
+  //               'Tips for a good description:',
+  //               style: TextStyle(
+  //                 fontWeight: FontWeight.w600,
+  //                 color: Colors.blue.shade700,
+  //                 fontSize: 12,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 6),
+  //         ...const [
+  //           '• Summarize the document\'s main content',
+  //           '• Include relevant keywords for searching',
+  //           '• Note important dates or deadlines',
+  //           '• Add context that isn\'t obvious from the title',
+  //         ].map((tip) => Padding(
+  //           padding: const EdgeInsets.only(left: 22, bottom: 2),
+  //           child: Text(
+  //             tip,
+  //             style: TextStyle(
+  //               color: Colors.blue.shade700,
+  //               fontSize: 11,
+  //             ),
+  //           ),
+  //         )),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easy_debounce/easy_debounce.dart';
 
 // Import the provider you created in the data layer step
 import '../providers/document_providers.dart';
 import '../controllers/add_document_controller.dart';
+import '../controllers/document_list_controller.dart';
 import '../widgets/document_list/document_list_item.dart';
 import '../widgets/document_list/filter_bottom_sheet.dart';
 import '../widgets/add_document/add_document_source_sheet.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../core/services/file_picker_service.dart';
-import '../../data/models/document_filter.dart';
 
 class DocumentListScreen extends ConsumerStatefulWidget {
   const DocumentListScreen({super.key});
@@ -22,6 +21,7 @@ class DocumentListScreen extends ConsumerStatefulWidget {
 
 class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
   bool _isSearching = false;
+  bool _isLoadingDialogShowing = false; // ✅ Track dialog state explicitly
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -29,8 +29,29 @@ class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
-    EasyDebounce.cancelAll();
     super.dispose();
+  }
+
+  // ✅ Helper method to show loading dialog
+  void _showLoadingDialog() {
+    if (!_isLoadingDialogShowing && mounted) {
+      _isLoadingDialogShowing = true;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+  }
+
+  // ✅ Helper method to dismiss loading dialog
+  void _dismissLoadingDialog() {
+    if (_isLoadingDialogShowing && mounted) {
+      _isLoadingDialogShowing = false;
+      Navigator.of(context, rootNavigator: true).pop();
+    }
   }
 
   void _toggleSearch() {
@@ -42,19 +63,13 @@ class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
       _searchFocusNode.requestFocus();
     } else {
       _searchController.clear();
-      ref.read(documentSearchQueryProvider.notifier).state = '';
+      ref.read(documentListControllerProvider.notifier).clearSearch();
       _searchFocusNode.unfocus();
     }
   }
 
   void _onSearchChanged(String query) {
-    EasyDebounce.debounce(
-      'search-documents',
-      const Duration(milliseconds: 300),
-      () {
-        ref.read(documentSearchQueryProvider.notifier).state = query;
-      },
-    );
+    ref.read(documentListControllerProvider.notifier).updateSearchQuery(query);
   }
 
   void _showFilterBottomSheet() {
@@ -67,37 +82,31 @@ class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 🔍 DEBUGGING: Listen to the add document controller state
+    // 🔍 FIXED: Better dialog management for add document controller
     ref.listen<AsyncValue<FilePickerResult?>>(addDocumentControllerProvider, (previous, next) {
       debugPrint('👂 [Listener] State changed: $next');
       
       // Handle loading state
       if (next is AsyncLoading) {
         debugPrint('⏳ [Listener] Loading state - showing dialog');
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
+        _showLoadingDialog();
       } 
-      // Handle success state
+      // Handle success state with file selected
       else if (next is AsyncData && next.value != null) {
-        // Dismiss loading dialog if showing
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
         debugPrint('🚀 [Listener] Navigating to /add-document with file: ${next.value?.fileName}');
+        _dismissLoadingDialog();
         context.go('/add-document', extra: next.value);
+      }
+      // ✅ FIXED: Handle user cancellation (AsyncData with null value)
+      else if (next is AsyncData && next.value == null) {
+        debugPrint('ℹ️ [Listener] User cancelled file selection - dismissing dialog with NEW method');
+        _dismissLoadingDialog();
+        // No error message needed for cancellation
       } 
       // Handle error state
       else if (next is AsyncError) {
-        // Dismiss loading dialog if showing
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
         debugPrint('❌ [Listener] Error received: ${next.error}');
+        _dismissLoadingDialog();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${next.error}'),
@@ -107,11 +116,9 @@ class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
       }
     });
 
-    // This is the magic link to your data layer.
-    // Riverpod will handle loading states, error states, and updates automatically.
-    final documentsAsyncValue = ref.watch(filteredDocumentListProvider);
-    final searchQuery = ref.watch(documentSearchQueryProvider);
-
+    // Use the new DocumentListController instead of direct providers
+    final documentListState = ref.watch(documentListControllerProvider);
+    
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -148,7 +155,7 @@ class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    ref.read(documentSearchQueryProvider.notifier).state = '';
+                    ref.read(documentListControllerProvider.notifier).clearSearch();
                   },
                 ),
               ]
@@ -163,84 +170,7 @@ class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
                 ),
               ],
       ),
-      body: documentsAsyncValue.when(
-        // The data is available, build the list
-        data: (documents) {
-          if (documents.isEmpty) {
-            if (searchQuery.isNotEmpty) {
-              // Empty search results
-              return EmptyStateWidget(
-                title: 'No documents found',
-                subtitle: 'Try adjusting your search terms or filters',
-                icon: Icons.search_off,
-                action: ElevatedButton.icon(
-                  onPressed: () {
-                    _searchController.clear();
-                    ref.read(documentSearchQueryProvider.notifier).state = '';
-                    ref.read(documentFilterStateProvider.notifier).state = 
-                        const DocumentFilter();
-                  },
-                  icon: const Icon(Icons.clear),
-                  label: const Text('Clear Search'),
-                ),
-              );
-            } else {
-              // No documents at all
-              return EmptyStateWidget(
-                title: 'No documents yet',
-                subtitle: 'Tap the + button to add your first document!',
-                icon: Icons.description_outlined,
-                action: ElevatedButton.icon(
-                  onPressed: () => context.go('/add-document'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Document'),
-                ),
-              );
-            }
-          }
-          return CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: SizedBox(height: 8), // Small top padding
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final doc = documents[index];
-                    return DocumentListItem(document: doc);
-                  },
-                  childCount: documents.length,
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: SizedBox(height: 80), // Bottom padding for FAB
-              ),
-            ],
-          );
-        },
-        // The data is still loading, show a spinner
-        loading: () => const Center(child: CircularProgressIndicator()),
-        // An error occurred, show an error message
-        error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Something went wrong',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                err.toString(),
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: _buildBody(documentListState),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
@@ -251,6 +181,93 @@ class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildBody(DocumentListState state) {
+    // Watch the filtered documents separately from the controller state
+    final documentsAsyncValue = ref.watch(filteredDocumentListProvider);
+    
+    return documentsAsyncValue.when(
+      data: (documents) {
+        if (documents.isEmpty) {
+          if (state.searchQuery.isNotEmpty) {
+            // Empty search results
+            return EmptyStateWidget(
+              title: 'No documents found',
+              subtitle: 'Try adjusting your search terms or filters',
+              icon: Icons.search_off,
+              action: ElevatedButton.icon(
+                onPressed: () {
+                  _searchController.clear();
+                  ref.read(documentListControllerProvider.notifier).clearSearch();
+                  ref.read(documentListControllerProvider.notifier).clearFilters();
+                },
+                icon: const Icon(Icons.clear),
+                label: const Text('Clear Search'),
+              ),
+            );
+          } else {
+            // No documents at all
+            return EmptyStateWidget(
+              title: 'No documents yet',
+              subtitle: 'Tap the + button to add your first document!',
+              icon: Icons.description_outlined,
+              action: ElevatedButton.icon(
+                onPressed: () => context.go('/add-document'),
+                icon: const Icon(Icons.add),
+                label: const Text('Add Document'),
+              ),
+            );
+          }
+        }
+
+        return CustomScrollView(
+          slivers: [
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 8), // Small top padding
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final doc = documents[index];
+                  return DocumentListItem(document: doc);
+                },
+                childCount: documents.length,
+              ),
+            ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 80), // Bottom padding for FAB
+            ),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Something went wrong',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              err.toString(),
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => ref.refresh(filteredDocumentListProvider),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -101,7 +101,7 @@ class DocumentErrorWidget extends StatelessWidget {
               Text(
                 message,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.8),
+                  color: colorScheme.onSurface.withValues(alpha:0.8),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -170,7 +170,7 @@ class InlineErrorWidget extends StatelessWidget {
           Text(
             message,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.8),
+              color: colorScheme.onSurface.withValues(alpha:0.8),
             ),
             textAlign: TextAlign.center,
           ),

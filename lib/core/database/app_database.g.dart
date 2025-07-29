@@ -138,6 +138,17 @@ class $DocumentsTable extends Documents
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _customFieldsMeta = const VerificationMeta(
+    'customFields',
+  );
+  @override
+  late final GeneratedColumn<String> customFields = GeneratedColumn<String>(
+    'custom_fields',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isArchivedMeta = const VerificationMeta(
     'isArchived',
   );
@@ -182,6 +193,7 @@ class $DocumentsTable extends Documents
     creationDate,
     updatedDate,
     expirationDate,
+    customFields,
     isArchived,
     isFavorite,
   ];
@@ -277,6 +289,15 @@ class $DocumentsTable extends Documents
         ),
       );
     }
+    if (data.containsKey('custom_fields')) {
+      context.handle(
+        _customFieldsMeta,
+        customFields.isAcceptableOrUnknown(
+          data['custom_fields']!,
+          _customFieldsMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_archived')) {
       context.handle(
         _isArchivedMeta,
@@ -350,6 +371,10 @@ class $DocumentsTable extends Documents
         DriftSqlType.dateTime,
         data['${effectivePrefix}expiration_date'],
       ),
+      customFields: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_fields'],
+      ),
       isArchived: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_archived'],
@@ -389,6 +414,7 @@ class Document extends DataClass implements Insertable<Document> {
   final DateTime creationDate;
   final DateTime updatedDate;
   final DateTime? expirationDate;
+  final String? customFields;
   final bool isArchived;
   final bool isFavorite;
   const Document({
@@ -404,6 +430,7 @@ class Document extends DataClass implements Insertable<Document> {
     required this.creationDate,
     required this.updatedDate,
     this.expirationDate,
+    this.customFields,
     required this.isArchived,
     required this.isFavorite,
   });
@@ -440,6 +467,9 @@ class Document extends DataClass implements Insertable<Document> {
     if (!nullToAbsent || expirationDate != null) {
       map['expiration_date'] = Variable<DateTime>(expirationDate);
     }
+    if (!nullToAbsent || customFields != null) {
+      map['custom_fields'] = Variable<String>(customFields);
+    }
     map['is_archived'] = Variable<bool>(isArchived);
     map['is_favorite'] = Variable<bool>(isFavorite);
     return map;
@@ -471,6 +501,9 @@ class Document extends DataClass implements Insertable<Document> {
       expirationDate: expirationDate == null && nullToAbsent
           ? const Value.absent()
           : Value(expirationDate),
+      customFields: customFields == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customFields),
       isArchived: Value(isArchived),
       isFavorite: Value(isFavorite),
     );
@@ -494,6 +527,7 @@ class Document extends DataClass implements Insertable<Document> {
       creationDate: serializer.fromJson<DateTime>(json['creationDate']),
       updatedDate: serializer.fromJson<DateTime>(json['updatedDate']),
       expirationDate: serializer.fromJson<DateTime?>(json['expirationDate']),
+      customFields: serializer.fromJson<String?>(json['customFields']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
     );
@@ -514,6 +548,7 @@ class Document extends DataClass implements Insertable<Document> {
       'creationDate': serializer.toJson<DateTime>(creationDate),
       'updatedDate': serializer.toJson<DateTime>(updatedDate),
       'expirationDate': serializer.toJson<DateTime?>(expirationDate),
+      'customFields': serializer.toJson<String?>(customFields),
       'isArchived': serializer.toJson<bool>(isArchived),
       'isFavorite': serializer.toJson<bool>(isFavorite),
     };
@@ -532,6 +567,7 @@ class Document extends DataClass implements Insertable<Document> {
     DateTime? creationDate,
     DateTime? updatedDate,
     Value<DateTime?> expirationDate = const Value.absent(),
+    Value<String?> customFields = const Value.absent(),
     bool? isArchived,
     bool? isFavorite,
   }) => Document(
@@ -551,6 +587,7 @@ class Document extends DataClass implements Insertable<Document> {
     expirationDate: expirationDate.present
         ? expirationDate.value
         : this.expirationDate,
+    customFields: customFields.present ? customFields.value : this.customFields,
     isArchived: isArchived ?? this.isArchived,
     isFavorite: isFavorite ?? this.isFavorite,
   );
@@ -578,6 +615,9 @@ class Document extends DataClass implements Insertable<Document> {
       expirationDate: data.expirationDate.present
           ? data.expirationDate.value
           : this.expirationDate,
+      customFields: data.customFields.present
+          ? data.customFields.value
+          : this.customFields,
       isArchived: data.isArchived.present
           ? data.isArchived.value
           : this.isArchived,
@@ -602,6 +642,7 @@ class Document extends DataClass implements Insertable<Document> {
           ..write('creationDate: $creationDate, ')
           ..write('updatedDate: $updatedDate, ')
           ..write('expirationDate: $expirationDate, ')
+          ..write('customFields: $customFields, ')
           ..write('isArchived: $isArchived, ')
           ..write('isFavorite: $isFavorite')
           ..write(')'))
@@ -622,6 +663,7 @@ class Document extends DataClass implements Insertable<Document> {
     creationDate,
     updatedDate,
     expirationDate,
+    customFields,
     isArchived,
     isFavorite,
   );
@@ -641,6 +683,7 @@ class Document extends DataClass implements Insertable<Document> {
           other.creationDate == this.creationDate &&
           other.updatedDate == this.updatedDate &&
           other.expirationDate == this.expirationDate &&
+          other.customFields == this.customFields &&
           other.isArchived == this.isArchived &&
           other.isFavorite == this.isFavorite);
 }
@@ -658,6 +701,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
   final Value<DateTime> creationDate;
   final Value<DateTime> updatedDate;
   final Value<DateTime?> expirationDate;
+  final Value<String?> customFields;
   final Value<bool> isArchived;
   final Value<bool> isFavorite;
   const DocumentsCompanion({
@@ -673,6 +717,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     this.creationDate = const Value.absent(),
     this.updatedDate = const Value.absent(),
     this.expirationDate = const Value.absent(),
+    this.customFields = const Value.absent(),
     this.isArchived = const Value.absent(),
     this.isFavorite = const Value.absent(),
   });
@@ -689,6 +734,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     required DateTime creationDate,
     required DateTime updatedDate,
     this.expirationDate = const Value.absent(),
+    this.customFields = const Value.absent(),
     this.isArchived = const Value.absent(),
     this.isFavorite = const Value.absent(),
   }) : title = Value(title),
@@ -708,6 +754,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     Expression<DateTime>? creationDate,
     Expression<DateTime>? updatedDate,
     Expression<DateTime>? expirationDate,
+    Expression<String>? customFields,
     Expression<bool>? isArchived,
     Expression<bool>? isFavorite,
   }) {
@@ -724,6 +771,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       if (creationDate != null) 'creation_date': creationDate,
       if (updatedDate != null) 'updated_date': updatedDate,
       if (expirationDate != null) 'expiration_date': expirationDate,
+      if (customFields != null) 'custom_fields': customFields,
       if (isArchived != null) 'is_archived': isArchived,
       if (isFavorite != null) 'is_favorite': isFavorite,
     });
@@ -742,6 +790,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     Value<DateTime>? creationDate,
     Value<DateTime>? updatedDate,
     Value<DateTime?>? expirationDate,
+    Value<String?>? customFields,
     Value<bool>? isArchived,
     Value<bool>? isFavorite,
   }) {
@@ -758,6 +807,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       creationDate: creationDate ?? this.creationDate,
       updatedDate: updatedDate ?? this.updatedDate,
       expirationDate: expirationDate ?? this.expirationDate,
+      customFields: customFields ?? this.customFields,
       isArchived: isArchived ?? this.isArchived,
       isFavorite: isFavorite ?? this.isFavorite,
     );
@@ -806,6 +856,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     if (expirationDate.present) {
       map['expiration_date'] = Variable<DateTime>(expirationDate.value);
     }
+    if (customFields.present) {
+      map['custom_fields'] = Variable<String>(customFields.value);
+    }
     if (isArchived.present) {
       map['is_archived'] = Variable<bool>(isArchived.value);
     }
@@ -830,6 +883,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
           ..write('creationDate: $creationDate, ')
           ..write('updatedDate: $updatedDate, ')
           ..write('expirationDate: $expirationDate, ')
+          ..write('customFields: $customFields, ')
           ..write('isArchived: $isArchived, ')
           ..write('isFavorite: $isFavorite')
           ..write(')'))
@@ -1504,6 +1558,7 @@ typedef $$DocumentsTableCreateCompanionBuilder =
       required DateTime creationDate,
       required DateTime updatedDate,
       Value<DateTime?> expirationDate,
+      Value<String?> customFields,
       Value<bool> isArchived,
       Value<bool> isFavorite,
     });
@@ -1521,6 +1576,7 @@ typedef $$DocumentsTableUpdateCompanionBuilder =
       Value<DateTime> creationDate,
       Value<DateTime> updatedDate,
       Value<DateTime?> expirationDate,
+      Value<String?> customFields,
       Value<bool> isArchived,
       Value<bool> isFavorite,
     });
@@ -1621,6 +1677,11 @@ class $$DocumentsTableFilterComposer
 
   ColumnFilters<DateTime> get expirationDate => $composableBuilder(
     column: $table.expirationDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customFields => $composableBuilder(
+    column: $table.customFields,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1729,6 +1790,11 @@ class $$DocumentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get customFields => $composableBuilder(
+    column: $table.customFields,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isArchived => $composableBuilder(
     column: $table.isArchived,
     builder: (column) => ColumnOrderings(column),
@@ -1792,6 +1858,11 @@ class $$DocumentsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get expirationDate => $composableBuilder(
     column: $table.expirationDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customFields => $composableBuilder(
+    column: $table.customFields,
     builder: (column) => column,
   );
 
@@ -1871,6 +1942,7 @@ class $$DocumentsTableTableManager
                 Value<DateTime> creationDate = const Value.absent(),
                 Value<DateTime> updatedDate = const Value.absent(),
                 Value<DateTime?> expirationDate = const Value.absent(),
+                Value<String?> customFields = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
               }) => DocumentsCompanion(
@@ -1886,6 +1958,7 @@ class $$DocumentsTableTableManager
                 creationDate: creationDate,
                 updatedDate: updatedDate,
                 expirationDate: expirationDate,
+                customFields: customFields,
                 isArchived: isArchived,
                 isFavorite: isFavorite,
               ),
@@ -1903,6 +1976,7 @@ class $$DocumentsTableTableManager
                 required DateTime creationDate,
                 required DateTime updatedDate,
                 Value<DateTime?> expirationDate = const Value.absent(),
+                Value<String?> customFields = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
               }) => DocumentsCompanion.insert(
@@ -1918,6 +1992,7 @@ class $$DocumentsTableTableManager
                 creationDate: creationDate,
                 updatedDate: updatedDate,
                 expirationDate: expirationDate,
+                customFields: customFields,
                 isArchived: isArchived,
                 isFavorite: isFavorite,
               ),
